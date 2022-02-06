@@ -2,10 +2,25 @@ const express = require('express')
 const router = express.Router()
 const peopledata = require('../data')
 const redis = require('redis');
-// const client = redis.createClient();
+const client = redis.createClient();
+
+(async () =>{
+    await client.connect();
+})();
 
 router.get('/history',async(req,res) => {
+    // zrange myset1 0 -1 rev
+    try {
+        let historyOfPeople = await client.zRange("History",0,20,"REV")
+        if(! historyOfPeople) throw {status:404,message:"No history"}
+        for (let i = 0; i < historyOfPeople.length; i++) {
+            historyOfPeople[i] = JSON.parse(historyOfPeople[i])
+          }
 
+        res.json(historyOfPeople)
+    } catch (e) {
+        res.status(e.status || 500).json({error:e.message})
+    }
 })
 
 router.get('/:id',async(req,res) => {

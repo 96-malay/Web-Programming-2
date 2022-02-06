@@ -25,11 +25,15 @@ module.exports = {
             //check in dummy data
             for (let j of dummyData){
                 if (j.id === id){
+                    await new Promise((resolve) => setTimeout(resolve, 5000));
                     console.log(j)
-                    // let setPeople = await client.set(id,flat(j))
                     let setPeople = await client.set(id,JSON.stringify(j))
-                    console.log(setPeople)
+
+                    let counter = await client.zCard("History") + 1
+                    let historyOfPeople = await client.zAdd("History" , {score:counter,value:JSON.stringify(j)}) //'History',id,JSON.stringify(j)
+
                     return j
+                    
                 }
             }
         }
