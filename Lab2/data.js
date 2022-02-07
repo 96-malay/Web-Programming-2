@@ -15,7 +15,7 @@ module.exports = {
         if(id.length === 0 ) throw {message:"Invalid Type of ID",status:400}
         id = parseInt(id)
         if(!id) throw {message:"Invalid ID",status:400}
-
+        let flag = false
         //check in cache
         let doesExist = await client.EXISTS(id)
         if(doesExist){
@@ -31,10 +31,14 @@ module.exports = {
 
                     let counter = await client.zCard("History") + 1
                     let historyOfPeople = await client.zAdd("History" , {score:counter,value:JSON.stringify(j)}) //'History',id,JSON.stringify(j)
-
+                    flag = true
                     return j
                     
                 }
+            }
+            if( flag === false) {
+                await new Promise((resolve) => setTimeout(resolve, 5000));
+                throw {message:"No data found", status:404}
             }
         }
         // await client.disconnect()

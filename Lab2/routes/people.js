@@ -11,13 +11,16 @@ const client = redis.createClient();
 router.get('/history',async(req,res) => {
     // zrange myset1 0 -1 rev
     try {
-        let historyOfPeople = await client.zRange("History",0,20,"REV")
-        if(! historyOfPeople) throw {status:404,message:"No history"}
-        for (let i = 0; i < historyOfPeople.length; i++) {
-            historyOfPeople[i] = JSON.parse(historyOfPeople[i])
+        let resultarray = []
+        let historyOfPeople = await client.zRange("History",0,-1)
+        if( historyOfPeople.length === 0) throw {status:404,message:"No history"}
+        let reqlen = (20 > historyOfPeople.length) ? 0 : historyOfPeople.length - 20
+        for (let i = historyOfPeople.length - 1 ; i >= reqlen; i--) {
+            resultarray.push(JSON.parse(historyOfPeople[i]))
+            // resultarray.append(JSON.parse(historyOfPeople[i]))
           }
 
-        res.json(historyOfPeople)
+        res.json(resultarray)
     } catch (e) {
         res.status(e.status || 500).json({error:e.message})
     }
